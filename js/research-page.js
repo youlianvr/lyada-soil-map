@@ -99,7 +99,7 @@
     }
 
     var svg = '<svg class="route-map-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
-      'aria-label="Схема полевого маршрута: 21 точка по контурам ЗИС">';
+      'aria-label="Схема полевого маршрута: 21 точка по контурам карты">';
 
     /* Контуры-призраки. */
     svg += '<g class="route-ghost">';

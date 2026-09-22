@@ -200,11 +200,6 @@
       format: 'lyada-field-observations',
       version: 1,
       exportedAt: new Date().toISOString(),
-      provenance: {
-        officialSource: 'ЗИС / Soils / nipd.by/qgisserver',
-        geometry: 'Контуры восстановлены по WMS GetMap; это производные данные.',
-        observations: 'Записи внесены пользователем локально и не являются официальными данными.'
-      },
       observations: observations
     };
 
