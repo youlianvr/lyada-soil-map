@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ляда — почвенная карта</title>
+  <meta name="description" content="Интерактивная карта почвенных контуров деревни Ляда: классы почв, площади участков, GPS-координаты и полевой маршрут.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%235F7349'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='17' font-weight='700' text-anchor='middle' fill='%23FAF7EE'%3E%D0%9B%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="css/style.css?v=20260918-lyada-3">
+  <link rel="stylesheet" href="css/engraving.css?v=20260918-lyada-3">
+</head>
+<body class="page-map">
+  <a class="skip-link" href="#mapHost">Перейти к карте</a>
+
+  <div class="app-shell">
+    <!-- Досье: медальон, статус, легенда, карточка участка, маршрут, действия -->
+    <aside class="dossier" id="dossier">
+      <div class="dossier-head">
+        <span class="medallion" aria-hidden="true">Л<small>ЛЯДА</small></span>
+        <div>
+          <div class="status-pill" id="statusPill" role="status" aria-live="polite">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span><small id="statusPillDetail">загружаем данные карты…</small></span>
+          </div>
+          <h1>Почвенная карта деревни Ляда</h1>
+          <p class="dossier-lead">Почвенные контуры деревни Ляда: класс, площадь и GPS каждого участка. Выберите контур на карте — досье покажет его характеристики.</p>
+        </div>
+      </div>
+
+      <div class="rule-vignette" aria-hidden="true"><span class="rule-diamond"></span></div>
+
+      <!-- Легенда -->
+      <section class="legend" id="legend" aria-label="Легенда почвенной карты">
+        <button id="legendToggle" class="legend-toggle" aria-expanded="true" aria-controls="legendBody">
+          <span>Легенда почвенной карты</span>
+          <span id="legendToggleIcon" aria-hidden="true">−</span>
+        </button>
+        <div id="legendBody">
+          <h3>Полевые категории</h3>
+          <div id="legendZis"></div>
+          <p class="legend-note" id="legendNote">
+            Категории участков: <b>A</b> — сухие песчаные, <b>B</b> — песчаные увлажнённые. Классы, площади и границы показаны для каждого контура. Подробнее — в разделе «Исследование».
+          </p>
+        </div>
+      </section>
+
+      <!-- Карточка выбранного участка (заполняется из app.js) -->
+      <section class="parcel-card" id="parcelCard" hidden>
+        <div class="parcel-head">
+          <span class="cat-stamp" id="parcelCatStamp">A</span>
+          <h2 id="parcelTitle">Участок</h2>
+        </div>
+        <p class="parcel-kicker" id="parcelKicker"></p>
+        <dl class="parcel-meta">
+          <dt>Код почвы</dt><dd id="parcelCode">—</dd>
+          <dt>Площадь</dt><dd id="parcelArea">—</dd>
+          <dt>Точка маршрута</dt><dd id="parcelRoute">—</dd>
+          <dt>GPS-центр</dt><dd id="parcelGps">—</dd>
+        </dl>
+        <div class="hatch parcel-photo-note">
+          <h3>Что сфотографировать</h3>
+          <p id="parcelPhoto">—</p>
+        </div>
+        <div class="parcel-links">
+          <a class="zis-link" id="parcelLinkResearch" href="research.html">Что значит этот класс</a>
+          <a class="zis-link" id="parcelLinkField" href="field.html">Открыть в маршруте</a>
+        </div>
+      </section>
+
+      <!-- Блок маршрута -->
+      <section class="route-block" aria-label="Полевой маршрут">
+        <div class="route-block-text">
+          <h2>Полевой маршрут</h2>
+          <p>21 точка с юга на север: GPS, инструкция и журнал наблюдений.</p>
+        </div>
+        <span class="route-hint">№ 1–21</span>
+      </section>
+
+      <div class="rule-vignette" aria-hidden="true"><span class="rule-diamond"></span></div>
+
+      <!-- Тулбар: ровно 5 действий (контракт) -->
+      <div class="toolbar" role="toolbar" aria-label="Действия">
+        <button class="btn" id="searchBtn" type="button" aria-keyshortcuts="/">
+          <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><span>Поиск</span>
+        </button>
+        <button class="btn" id="sourceBtn" type="button" aria-pressed="false">
+          <svg class="icon" aria-hidden="true"><use href="#i-satellite"/></svg><span id="sourceBtnLabel">Спутник</span>
+        </button>
+        <button class="btn" id="shareBtn" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#i-share"/></svg><span>Поделиться</span>
+        </button>
+        <a class="btn" href="field.html" id="fieldLink">
+          <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg><span>Маршрут</span>
+        </a>
+        <a class="btn btn-primary" href="research.html" id="researchLink">
+          <svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>Исследование</span>
+        </a>
+      </div>
+
+      <button class="sheet-handle" id="sheetHandle" type="button" hidden>
+        <span class="sheet-handle-bar" aria-hidden="true"></span>
+        <span class="sheet-handle-label">Досье карты</span>
+      </button>
+    </aside>
+
+    <!-- Карта: изолированный stacking context — панели над ней больше не спорят -->
+    <div class="map-area">
+      <div class="map-host" id="mapHost" tabindex="-1" role="region" aria-label="Карта почвенных контуров"></div>
+      <div class="map-veil" aria-hidden="true"></div>
+      <div class="map-vignette" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- Поиск (Spotlight-style) -->
+  <div class="search-overlay" id="searchOverlay" role="presentation"></div>
+  <div class="search-box" id="searchBox" role="dialog" aria-modal="true" aria-label="Поиск зон" hidden>
+    <div class="search-field">
+      <svg class="icon search-icon" aria-hidden="true"><use href="#i-search"/></svg>
+      <input id="searchInput" type="text" placeholder="Код почвы, класс, зона…" autocomplete="off" aria-label="Поиск зон">
+    </div>
+    <div class="search-results" id="searchResults" aria-live="polite"></div>
+    <p class="search-hint">↑↓ — выбор · Enter — открыть на карте · Esc — закрыть</p>
+  </div>
+
+  <!-- Share popup -->
+  <div class="share-overlay" id="shareOverlay" role="presentation"></div>
+  <div class="share-box" id="shareBox" role="dialog" aria-modal="true" aria-label="Поделиться картой" hidden>
+    <h2>Ссылка на эту точку карты</h2>
+    <input id="shareInput" type="text" readonly aria-label="Ссылка">
+    <p class="search-hint">Скопировано. Esc — закрыть.</p>
+  </div>
+
+  <!-- Тост -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Гравюрная иконная семья: stroke=currentColor, 1.5px (DESIGN.md: никаких эмодзи) -->
+  <svg class="icon-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></symbol>
+      <symbol id="i-satellite" viewBox="0 0 24 24"><path d="M7.5 3.5 11 7l-3.5 3.5L4 7z"/><path d="m9.2 8.8 2 2"/><path d="M14 10.5 20.5 17l-3 3L11 13.5z"/><path d="M13 17c-2.5 0-4.5 2-4.5 4.5"/><path d="M9.5 13.5C7 13.5 5 15.5 5 18"/></symbol>
+      <symbol id="i-share" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="5.5" r="2.6"/><circle cx="17.5" cy="18.5" r="2.6"/><line x1="8.3" y1="10.8" x2="15.2" y2="6.7"/><line x1="8.3" y1="13.2" x2="15.2" y2="17.3"/></symbol>
+      <symbol id="i-flag" viewBox="0 0 24 24"><line x1="5.5" y1="3.5" x2="5.5" y2="21"/><path d="M5.5 4.5h12l-3 4 3 4h-12"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5C4.7 20 4 19.3 4 18.5z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5-.7 1.5-1.5z"/><line x1="12" y1="4" x2="12" y2="20"/></symbol>
+      <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+      <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.2"/><path d="m8 6 1.5-2.5h5L16 6"/></symbol>
+    </defs>
+  </svg>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <!-- Единственный тематический слой карты — почвенные контуры. -->
+  <script src="js/research.js"></script>
+  <script src="js/app.js?v=20260918-lyada-2"></script>
+</body>
+</html>

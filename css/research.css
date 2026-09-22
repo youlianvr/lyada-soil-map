@@ -1,0 +1,244 @@
+/* research.css — отдельный экран исследования «Ляды».
+ * Спокойная страница для чтения методики/классов/источников.
+ * Не загружается на index.html — там работает style.css.
+ */
+
+body.page-research {
+  --paper: #f3eee1;
+  --paper-soft: #faf7ee;
+  --ink: #3f3a2f;
+  --ink-2: #6f6855;
+  --rule: #b8ac8a;
+  --accent: #5f7349;
+  --cat-a: #b57a28;
+  --cat-b: #2f7d96;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0 0 80px;
+  overflow: auto;
+}
+
+body.page-research .skip-link {
+  position: absolute; left: -9999px; top: 0;
+}
+body.page-research .skip-link:focus {
+  left: 1rem; top: 1rem; z-index: 100;
+  background: var(--accent); color: var(--paper);
+  padding: .4rem .8rem; border-radius: 6px;
+}
+
+.research-head {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 56px 24px 24px;
+}
+.research-head h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 44px;
+  margin: 16px 0 4px;
+  letter-spacing: -.5px;
+}
+.research-head > p {
+  margin: 0 0 24px;
+  color: var(--ink-2);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 19px;
+}
+.research-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+}
+.research-nav a {
+  color: var(--ink-2);
+  text-decoration: none;
+  padding: 4px 0;
+}
+.research-nav a:hover { color: var(--accent); text-decoration: underline; }
+
+.research-main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.research-block {
+  margin: 56px 0;
+  scroll-margin-top: 16px;
+}
+.research-block h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 30px;
+  margin: 0 0 12px;
+  letter-spacing: -.3px;
+}
+.research-block h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 21px;
+  margin: 24px 0 8px;
+  color: var(--ink-2);
+}
+.research-block p { margin: 12px 0; }
+.research-block ul, .research-block ol { padding-left: 22px; }
+.research-block li { margin: 6px 0; }
+.research-block code {
+  background: #F0EBD8;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', Menlo, Consolas, monospace;
+  font-size: 14px;
+}
+.research-note {
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-top: 8px;
+}
+
+/* Таблица классов — плотная, читаемая; штамп категории — гравюрная медаль */
+.classes-table { margin-top: 8px; }
+.classes-row {
+  display: grid;
+  grid-template-columns: 18px 78px 44px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 2px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  align-items: center;
+  scroll-margin-top: 16px;
+  transition: background .25s ease;
+}
+.classes-row.is-focused {
+  background: var(--paper-soft);
+  border-radius: 6px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.classes-swatch {
+  grid-row: 1 / span 2;
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.classes-code { color: var(--ink-2); font-family: 'JetBrains Mono', Menlo, Consolas, monospace; font-size: 14px; }
+.classes-stamp { grid-row: 1 / span 2; }
+.classes-stamp .cat-stamp {
+  width: 34px; height: 34px; min-width: 34px; min-height: 34px;
+  padding: 0;
+  font-size: 17px;
+}
+.classes-name { font-weight: 700; }
+.classes-note { font-size: 14px; color: var(--ink-2); }
+
+.research-foot {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px;
+  border-top: 1px solid var(--rule);
+  font-size: 14px;
+  color: var(--ink-2);
+  text-align: center;
+}
+.research-foot-meta { font-style: italic; }
+
+@media (max-width: 600px) {
+  body.page-research { font-size: 16px; }
+  .research-head h1 { font-size: 34px; }
+  .research-block h2 { font-size: 25px; }
+  .classes-row {
+    grid-template-columns: 18px 1fr 44px;
+    grid-template-rows: auto auto auto;
+  }
+  .classes-swatch { grid-row: 1 / span 3; }
+  .classes-code { grid-column: 2; }
+  .classes-stamp { grid-column: 3; grid-row: 1 / span 3; }
+  .classes-name { grid-column: 2; }
+  .classes-note { grid-column: 2; }
+}
+
+/* ============================================================
+   Гравюра разреза почвы — сигнатура research-страницы.
+   Слои красятся химией альбома: дёрн зелёный, пахота охра,
+   подпахотный — холодный, глей — сизый; штриховка — defs-паттерны.
+   ============================================================ */
+.soil-profile {
+  margin: 28px 0 8px;
+}
+.soil-profile-title {
+  font: 600 20px/1.3 var(--serif);
+  margin-bottom: 12px;
+}
+.soil-profile-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--ink);
+  background: var(--paper-soft);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-base, 6px);
+  padding: 10px 6px;
+}
+.sp-sod      { fill: #5f7349; }
+.sp-topsoil  { fill: #b57a28; }
+.sp-subsoil  { fill: #d8c49a; }
+.sp-gley     { fill: #9fb3b8; }
+.sp-hatch    { fill: url(#spHatch); }
+.sp-hatch-wide { fill: url(#spHatchWide); }
+.sp-hatch-dense { fill: url(#spHatchDense); }
+
+/* ============================================================
+   Схема маршрута — 21 точка, «нить» с номерами. SVG строится
+   research-page.js из данных geojson (см. buildRouteMap).
+   ============================================================ */
+.route-map-figure { margin: 28px 0 8px; }
+.route-map-title {
+  font: 600 20px/1.3 var(--serif);
+  margin-bottom: 12px;
+}
+.route-map-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--paper-soft);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-base, 6px);
+}
+.route-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  opacity: .7;
+}
+.route-ghost path {
+  fill: rgba(111, 104, 85, 0.06);
+  stroke: rgba(111, 104, 85, 0.35);
+  stroke-width: 1;
+}
+.route-node circle {
+  fill: var(--paper-soft);
+  stroke-width: 1.5;
+}
+.route-node text {
+  font: 700 9px var(--sans);
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: var(--paper-soft);
+}
+.route-map-note {
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-top: 8px;
+}

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ляда — исследование</title>
+  <meta name="description" content="Классификация почвенных контуров, полевой маршрут и состояние работы проекта «Ляда — почвенная карта».">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%235F7349'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='17' font-weight='700' text-anchor='middle' fill='%23FAF7EE'%3E%D0%9B%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/engraving.css">
+  <link rel="stylesheet" href="css/research.css">
+</head>
+<body class="page-research">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+
+  <header class="research-head">
+    <a href="index.html" class="btn btn-ghost">← на карту</a>
+    <div class="album-head">
+      <span class="medallion" aria-hidden="true">Л<small>ЛЯДА</small></span>
+      <div>
+        <h1 id="main">Исследование</h1>
+        <p>Как устроена карта, что показывают классы почв и как проходил полевой маршрут проекта «Ляда — почвенная карта».</p>
+      </div>
+    </div>
+    <nav class="research-nav" aria-label="Разделы исследования">
+      <a href="#approach">О карте</a>
+      <a href="#classes">Классы</a>
+      <a href="#state">Состояние</a>
+      <a href="#route">Маршрут</a>
+    </nav>
+  </header>
+
+  <main class="research-main">
+    <section id="approach" class="research-block">
+      <h2>Зачем нужна эта карта</h2>
+      <p>Карта помогает перейти от общего вида территории к проверяемым вопросам: где искать различия, какие точки посетить первыми и что сравнить в поле. Каждый контур имеет класс почвы и площадь, поэтому карта опирается на точную классификацию, а не на оттенки спутникового снимка.</p>
+    </section>
+
+    <section id="classes" class="research-block">
+      <h2>Классы почв на кадре Ляды</h2>
+      <p>Здесь собраны классы, которые встречаются на карте, их краткие названия и охват. Полные атрибуты доступны в карточке каждой зоны.</p>
+      <div id="classesTable">загружаем…</div>
+      <p class="research-note">Код почвы и площадь показаны в карточке каждой зоны. Полевые категории A/B дополняют карту практическими признаками для полевого маршрута.</p>
+
+      <figure class="soil-profile" aria-label="Схема разреза почвы: дёрн, пахотный песок, подпахотный горизонт, глей">
+        <figcaption class="soil-profile-title">Разрез почвы: что показывают категории</figcaption>
+        <svg viewBox="0 0 640 220" role="img" class="soil-profile-svg">
+          <defs>
+            <pattern id="spHatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="7" stroke="#3f3a2f" stroke-width="0.6" opacity="0.35"/>
+            </pattern>
+            <pattern id="spHatchWide" width="12" height="12" patternTransform="rotate(-45)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="12" stroke="#3f3a2f" stroke-width="0.6" opacity="0.25"/>
+            </pattern>
+            <pattern id="spHatchDense" width="3.5" height="3.5" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="3.5" stroke="#3f3a2f" stroke-width="0.6" opacity="0.45"/>
+            </pattern>
+          </defs>
+          <!-- слои разреза -->
+          <rect x="70" y="18"  width="500" height="34" class="sp-layer sp-sod"/>
+          <rect x="70" y="52"  width="500" height="56" class="sp-layer sp-topsoil"/>
+          <rect x="70" y="108" width="500" height="46" class="sp-layer sp-subsoil"/>
+          <rect x="70" y="154" width="500" height="48" class="sp-layer sp-gley"/>
+          <!-- гравюрная штриховка слоёв -->
+          <rect x="70" y="18"  width="500" height="34" class="sp-hatch"/>
+          <rect x="70" y="52"  width="500" height="56" class="sp-hatch sp-hatch-wide"/>
+          <rect x="70" y="108" width="500" height="46" class="sp-hatch"/>
+          <rect x="70" y="154" width="500" height="48" class="sp-hatch sp-hatch-dense"/>
+          <!-- рамка разреза -->
+          <rect x="70" y="18" width="500" height="184" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <!-- глубинная шкала -->
+          <line x1="60" y1="18" x2="60" y2="202" stroke="currentColor" stroke-width="1"/>
+          <g font-family="Georgia, serif" font-size="11" fill="currentColor" text-anchor="end">
+            <text x="56" y="30">0 см</text>
+            <text x="56" y="62">20</text>
+            <text x="56" y="112">50</text>
+            <text x="56" y="162">90</text>
+            <text x="56" y="200">120+</text>
+          </g>
+          <!-- подписи слоёв -->
+          <g font-family="Georgia, serif" font-size="13" fill="currentColor">
+            <text x="84" y="40">Дёрн</text>
+            <text x="84" y="86">Пахотный песок</text>
+            <text x="84" y="136">Подпахотный горизонт</text>
+            <text x="84" y="184">Глей (постоянное увлажнение)</text>
+          </g>
+          <!-- категории справа -->
+          <g font-family="Georgia, serif" font-size="12">
+            <rect x="592" y="52" width="34" height="56" fill="#b57a28" stroke="#3f3a2f" stroke-width="1"/>
+            <text x="609" y="85" text-anchor="middle" fill="#faf7ee" font-weight="700">A</text>
+            <rect x="592" y="108" width="34" height="94" fill="#2f7d96" stroke="#3f3a2f" stroke-width="1"/>
+            <text x="609" y="160" text-anchor="middle" fill="#faf7ee" font-weight="700">B</text>
+          </g>
+        </svg>
+        <figcaption class="research-note">Категория A — сухие песчаные: глей глубоко, профиль светлый. Категория B — увлажнённые: глеевый горизонт ближе к поверхности, окраска холоднее.</figcaption>
+      </figure>
+    </section>
+
+    <section id="state" class="research-block">
+      <h2>Состояние проекта</h2>
+      <h3>Сделано</h3>
+      <ul>
+        <li>Геометрия: 21 замкнутый контур с классом почвы и площадью каждого. Воспроизводимость построения проверяется автоматическими тестами.</li>
+        <li>Атрибуты: код почвы, идентификатор объекта и площадь — в карточке каждой зоны.</li>
+        <li>Контекст: деревня и водные линии показаны серым фоном, чтобы было видно, где живут люди и течёт вода.</li>
+        <li>Подложки: схема и спутник; при отсутствии сети карта работает на локальных снимках.</li>
+      </ul>
+      <h3>Дальнейшие шаги</h3>
+      <ul>
+        <li><strong>Полевая верификация.</strong> Маршрут из 21 точки готов: каждая точка снабжена GPS-координатами, инструкцией и журналом наблюдений для сопоставления карты с реальными условиями.</li>
+        <li><strong>Кадастровая привязка.</strong> Связывание конкретных полей с контурами для детализации границ.</li>
+      </ul>
+    </section>
+
+    <section id="route" class="research-block">
+      <h2>Полевой маршрут: 21 точка</h2>
+      <p>Порядок обхода — с юга на север: от сухих песчаных участков к увлажнённым и обратно к границе деревни. Номера на схеме соответствуют точкам полевого журнала; цвет — категория участка.</p>
+      <figure class="route-map-figure">
+        <div id="routeMap">загружаем…</div>
+        <figcaption class="route-map-note">Схема построена из тех же данных, что и карта: контуры почв и GPS-центры точек маршрута.</figcaption>
+      </figure>
+    </section>
+  </main>
+
+  <footer class="research-foot">      <p>Вернуться на <a href="index.html">карту деревни Ляда</a> или открыть <a href="field.html">полевой маршрут</a>.</p>
+    <p class="research-foot-meta">Карта показывает почвенные контуры деревни Ляда; полевой маршрут из 21 точки связывает их с наблюдениями на местности.</p>
+  </footer>
+
+  <script src="js/research.js"></script>
+  <script src="js/research-page.js"></script>
+</body>
+</html>
