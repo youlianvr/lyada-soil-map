@@ -1,14 +1,20 @@
 /* app.js — «Ляда» интерактивная почвенная карта.
  *
  * Данные: js/research.js (R) — классы ЗИС для легенды/поиска.
+ *          js/agro-recommendations.js — рекомендации по категориям участков.
  * Зоны: data/zis-soil-derived.geojson — 21 контур, восстановлен по WMS.
  * Подложка: OSM-схема или спутник; поверх неё только классифицированные контуры ЗИС.
+ *
+ * Главный сценарий: клик по контуру открывает в досье характеристику участка
+ * и рекомендации по его использованию.
  */
 
 (function () {
   'use strict';
 
   var R = window.LYADA_RESEARCH;
+  /* Рекомендации по категориям A/B/C — из главы 3 работы. */
+  var RECS = window.LYADA_RECOMMENDATIONS || {};
   // Карта намеренно показывает только один тематический слой: ЗИС.
   // OSM остаётся подложкой, а производные ориентиры не рисуются поверх почв.
 
@@ -65,11 +71,12 @@
   var parcelKicker = $('#parcelKicker');
   var parcelCode = $('#parcelCode');
   var parcelArea = $('#parcelArea');
-  var parcelRoute = $('#parcelRoute');
   var parcelGps = $('#parcelGps');
-  var parcelPhoto = $('#parcelPhoto');
+  var parcelCharacter = $('#parcelCharacter');
+  var parcelRecs = $('#parcelRecs');
+  var parcelRecsNote = $('#parcelRecsNote');
   var parcelLinkResearch = $('#parcelLinkResearch');
-  var parcelLinkField = $('#parcelLinkField');
+  var mapHint = $('#mapHint');
 
   /* ============================================================
    * Классы ЗИС → цвет. Если код не в списке — серый, "неизвестно".
@@ -139,6 +146,9 @@
     C: '#7d8f5e'
   };
 
+  /* Чернила альбома: тёмная тёплая обводка у всех контуров. */
+  var INK_STROKE = '#3f3a2f';
+
   function renderZisLayer(features) {
     zisFeatures = features;
     // Легенда строится по 3 полевым категориям (A/B/C), не по 5 ЗИС-кодам.
@@ -179,10 +189,19 @@
       var color = CATEGORY_COLORS[cat] || ly.color || SOIL_COLOR[prefix] || DEFAULT_COLOR;
       var key = p.id || p.officialObjectId || prefix;
       var layer = L.geoJSON(f, {
+        /* Клик по контуру не всплывает на карту. Без этого срабатывал и
+         * обработчик карты «снять выделение», карточка открывалась и в тот же
+         * тик скрывалась: со стороны это выглядело как полное отсутствие
+         * интерактива. */
+        bubblingMouseEvents: false,
         style: {
           className: 'zis-soil-polygon',
-          color: color,
-          fillColor: color
+          /* Чернильная обводка + цветная заливка: контуры читаются как
+           * напечатанные на подложке, а не растворяются в ней. */
+          color: INK_STROKE,
+          weight: 1.5,
+          fillColor: color,
+          fillOpacity: 0.82
         }
       }).addTo(map);
       /* Клик по контуру открывает карточку в досье (не Leaflet-попап). */
@@ -201,7 +220,7 @@
     statusPillDetail.textContent = [
       total + ' ' + pluralRu(total, 'контур', 'контура', 'контуров'),
       categorySummary.join(' · '),
-      'маршрут готов'
+      'выберите контур'
     ].filter(Boolean).join(' · ');
   }
 
@@ -216,40 +235,73 @@
     var ha = (parseFloat(p.officialAreaSqm) || 0) / 10000;
     var center = ly.center || null;
     var key = p.id || p.officialObjectId || prefix;
+    var recs = RECS[cat] || null;
 
     parcelCatStamp.textContent = cat;
     parcelCatStamp.style.setProperty('--stamp-color', color || DEFAULT_COLOR);
     parcelTitle.textContent = name;
-    parcelKicker.textContent = catName + (ly.routeOrder ? (' · точка ' + ly.routeOrder + ' из 21') : '');
+    parcelKicker.textContent = catName;
     parcelCode.textContent = (prefix || '—') + ' · объект ' + (p.officialObjectId || '—');
-    parcelArea.textContent = ha ? ha.toFixed(1) + ' га' : 'не указана';
-    parcelRoute.textContent = ly.routeOrder ? ('№ ' + ly.routeOrder + ' из 21 (юг → север)') : '—';
+    parcelArea.textContent = ha ? ha.toFixed(1).replace('.', ',') + ' га' : 'не указана';
     parcelGps.innerHTML = center
       ? '<a href="https://maps.google.com/?q=' + center[0].toFixed(5) + ',' + center[1].toFixed(5) + '" target="_blank" rel="noopener noreferrer">' + center[0].toFixed(5) + ', ' + center[1].toFixed(5) + '</a>'
       : '—';
-    parcelPhoto.textContent = ly.photoTarget || 'Общий план';
+
+    /* Характеристика и рекомендации берутся по категории участка — это
+     * главный ответ карты на вопрос «что тут делать». */
+    parcelCharacter.textContent = (recs && recs.character) || 'Характеристика участка собирается по классу почвы.';
+    parcelRecs.innerHTML = '';
+    if (recs && recs.items) {
+      recs.items.forEach(function (text) {
+        var li = document.createElement('li');
+        li.textContent = text;
+        parcelRecs.appendChild(li);
+      });
+    }
+    /* Сноска об уточнении доз общая для всех категорий. */
+    var note = (recs && recs.note) || RECS.note || '';
+    parcelRecsNote.textContent = note;
+    parcelRecsNote.hidden = !note;
+
     parcelLinkResearch.href = 'research.html#' + escAttr(prefix || 'unknown');
-    parcelLinkField.href = 'field.html#' + escAttr(p.id || 'unknown');
     parcelCard.hidden = false;
+    if (mapHint) mapHint.hidden = true;
+    revealParcelOnMobile();
+    /* Досье скроллится: карточка не должна оставаться за кромкой. */
+    if (parcelCard.scrollIntoView) parcelCard.scrollIntoView({ block: 'nearest' });
     selectedFeatureKey = key;
     highlightSelection(key);
   }
 
+  /* На узком экране досье лежит свёрнутым в нижний лист: выбранный участок
+   * бесполезен, пока лист не развёрнут, поэтому разворачиваем его сами. */
+  function revealParcelOnMobile() {
+    var shell = document.querySelector('.app-shell');
+    if (!shell || !shell.classList.contains('sheet-collapsed')) return;
+    var handle = $('#sheetHandle');
+    if (handle && handle.hidden === false) handle.click();
+  }
+
+  /* Выделение выбранного контура — CSS-классом на самом path: presentation
+   * атрибуты Leaflet.setStyle перебиваются правилами .zis-soil-polygon, поэтому
+   * признак выбора живёт в классе .is-selected. Остальные контуры при выборе
+   * приглушаются: выбранный участок должен быть виден сразу, без поиска глазами. */
   function highlightSelection(key) {
+    var hasSelection = key != null && !!zisLayerByKey[key];
     Object.keys(zisLayerByKey).forEach(function (k) {
-      var el = zisLayerByKey[k];
-      if (el && el.eachLayer) {
-        el.eachLayer(function (sub) {
-          if (sub.setStyle) sub.setStyle({ weight: 2.5 });
-        });
-      }
+      var selected = hasSelection && k === key;
+      markPathState(zisLayerByKey[k], selected, hasSelection && !selected);
     });
-    var layer = zisLayerByKey[key];
-    if (layer && layer.eachLayer) {
-      layer.eachLayer(function (sub) {
-        if (sub.setStyle) sub.setStyle({ weight: 4 });
-      });
-    }
+  }
+
+  function markPathState(layer, selected, dimmed) {
+    if (!layer || !layer.eachLayer) return;
+    layer.eachLayer(function (sub) {
+      var el = sub.getElement ? sub.getElement() : null;
+      if (!el || !el.classList) return;
+      el.classList.toggle('is-selected', !!selected);
+      el.classList.toggle('is-dimmed', !!dimmed);
+    });
   }
 
   function escHtml(s) {
@@ -299,7 +351,7 @@
       var layer = L.geoJSON(f);
       try { bounds.extend(layer.getBounds()); } catch (e) { /* noop */ }
     });
-    if (bounds.isValid()) map.fitBounds(bounds.pad(0.02));
+    if (bounds.isValid()) map.fitBounds(bounds.pad(0.06), { maxZoom: 15 });
   }
 
   /* Выделение снимается кликом по карте вне контуров. */

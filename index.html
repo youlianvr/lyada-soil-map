@@ -4,18 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ляда — почвенная карта</title>
-  <meta name="description" content="Интерактивная карта почвенных контуров деревни Ляда: классы почв, площади участков, GPS-координаты и полевой маршрут.">
+  <meta name="description" content="Интерактивная карта почвенных контуров деревни Ляда: класс почвы, площадь участка и рекомендации по его использованию.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%235F7349'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='17' font-weight='700' text-anchor='middle' fill='%23FAF7EE'%3E%D0%9B%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
-  <link rel="stylesheet" href="css/style.css?v=20260918-lyada-3">
-  <link rel="stylesheet" href="css/engraving.css?v=20260918-lyada-3">
+  <link rel="stylesheet" href="css/style.css?v=20260924-lyada-2">
+  <link rel="stylesheet" href="css/engraving.css?v=20260924-lyada-2">
 </head>
 <body class="page-map">
   <a class="skip-link" href="#mapHost">Перейти к карте</a>
 
   <div class="app-shell">
-    <!-- Досье: медальон, статус, легенда, карточка участка, маршрут, действия -->
+    <!-- Досье: медальон, статус, легенда, карточка участка с рекомендациями, действия -->
     <aside class="dossier" id="dossier">
       <div class="dossier-head">
         <span class="medallion" aria-hidden="true">Л<small>ЛЯДА</small></span>
@@ -25,7 +25,7 @@
             <span><small id="statusPillDetail">загружаем данные карты…</small></span>
           </div>
           <h1>Почвенная карта деревни Ляда</h1>
-          <p class="dossier-lead">Почвенные контуры деревни Ляда: класс, площадь и GPS каждого участка. Выберите контур на карте — досье покажет его характеристики.</p>
+          <p class="dossier-lead">Нажмите на контур: досье покажет класс почвы, площадь участка и рекомендации по его использованию.</p>
         </div>
       </div>
 
@@ -41,46 +41,42 @@
           <h3>Полевые категории</h3>
           <div id="legendZis"></div>
           <p class="legend-note" id="legendNote">
-            Категории участков: <b>A</b> — сухие песчаные, <b>B</b> — песчаные увлажнённые. Классы, площади и границы показаны для каждого контура. Подробнее — в разделе «Исследование».
+            Категории участков: <b>A</b> — сухие песчаные, <b>B</b> — песчаные увлажнённые. Нажмите на контур, чтобы увидеть характеристику участка и рекомендации по его использованию.
           </p>
         </div>
       </section>
 
-      <!-- Карточка выбранного участка (заполняется из app.js) -->
-      <section class="parcel-card" id="parcelCard" hidden>
+      <!-- Карточка выбранного участка: характеристика + рекомендации (app.js) -->
+      <section class="parcel-card" id="parcelCard" hidden aria-label="Выбранный участок и рекомендации">
         <div class="parcel-head">
           <span class="cat-stamp" id="parcelCatStamp">A</span>
-          <h2 id="parcelTitle">Участок</h2>
+          <div class="parcel-head-text">
+            <h2 id="parcelTitle">Участок</h2>
+            <p class="parcel-kicker" id="parcelKicker"></p>
+          </div>
         </div>
-        <p class="parcel-kicker" id="parcelKicker"></p>
         <dl class="parcel-meta">
           <dt>Код почвы</dt><dd id="parcelCode">—</dd>
           <dt>Площадь</dt><dd id="parcelArea">—</dd>
-          <dt>Точка маршрута</dt><dd id="parcelRoute">—</dd>
           <dt>GPS-центр</dt><dd id="parcelGps">—</dd>
         </dl>
-        <div class="hatch parcel-photo-note">
-          <h3>Что сфотографировать</h3>
-          <p id="parcelPhoto">—</p>
+        <div class="parcel-block">
+          <h3>Характеристика</h3>
+          <p id="parcelCharacter"></p>
+        </div>
+        <div class="parcel-block parcel-block-recs">
+          <h3 id="parcelRecsTitle">Рекомендации</h3>
+          <ol class="parcel-recs" id="parcelRecs"></ol>
+          <p class="parcel-recs-note" id="parcelRecsNote"></p>
         </div>
         <div class="parcel-links">
           <a class="zis-link" id="parcelLinkResearch" href="research.html">Что значит этот класс</a>
-          <a class="zis-link" id="parcelLinkField" href="field.html">Открыть в маршруте</a>
         </div>
-      </section>
-
-      <!-- Блок маршрута -->
-      <section class="route-block" aria-label="Полевой маршрут">
-        <div class="route-block-text">
-          <h2>Полевой маршрут</h2>
-          <p>21 точка с юга на север: GPS, инструкция и журнал наблюдений.</p>
-        </div>
-        <span class="route-hint">№ 1–21</span>
       </section>
 
       <div class="rule-vignette" aria-hidden="true"><span class="rule-diamond"></span></div>
 
-      <!-- Тулбар: ровно 5 действий (контракт) -->
+      <!-- Тулбар: поиск, подложка, шаринг, исследование -->
       <div class="toolbar" role="toolbar" aria-label="Действия">
         <button class="btn" id="searchBtn" type="button" aria-keyshortcuts="/">
           <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><span>Поиск</span>
@@ -91,9 +87,6 @@
         <button class="btn" id="shareBtn" type="button">
           <svg class="icon" aria-hidden="true"><use href="#i-share"/></svg><span>Поделиться</span>
         </button>
-        <a class="btn" href="field.html" id="fieldLink">
-          <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg><span>Маршрут</span>
-        </a>
         <a class="btn btn-primary" href="research.html" id="researchLink">
           <svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>Исследование</span>
         </a>
@@ -108,8 +101,8 @@
     <!-- Карта: изолированный stacking context — панели над ней больше не спорят -->
     <div class="map-area">
       <div class="map-host" id="mapHost" tabindex="-1" role="region" aria-label="Карта почвенных контуров"></div>
-      <div class="map-veil" aria-hidden="true"></div>
       <div class="map-vignette" aria-hidden="true"></div>
+      <p class="map-hint" id="mapHint">Нажмите на контур: покажем характеристику и рекомендации</p>
     </div>
   </div>
 
@@ -149,8 +142,10 @@
   </svg>
 
   <script src="vendor/leaflet/leaflet.js"></script>
+  <!-- Рекомендации по категориям участков — из главы 3 работы. -->
+  <script src="js/agro-recommendations.js"></script>
   <!-- Единственный тематический слой карты — почвенные контуры. -->
   <script src="js/research.js"></script>
-  <script src="js/app.js?v=20260918-lyada-2"></script>
+  <script src="js/app.js?v=20260924-lyada-2"></script>
 </body>
 </html>

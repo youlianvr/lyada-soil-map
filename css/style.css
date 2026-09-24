@@ -231,10 +231,11 @@ body.page-map { overflow: hidden; }
 }
 .parcel-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-  margin-bottom: 2px;
+  margin-bottom: 8px;
 }
+.parcel-head-text { min-width: 0; }
 .parcel-head h2 {
   font: 700 17px/1.15 var(--serif);
   color: var(--green-deep);
@@ -242,7 +243,7 @@ body.page-map { overflow: hidden; }
 .parcel-kicker {
   font: 400 12px/1.4 var(--sans);
   color: var(--muted);
-  margin: 2px 0 8px;
+  margin-top: 2px;
 }
 .parcel-meta {
   display: grid;
@@ -254,25 +255,51 @@ body.page-map { overflow: hidden; }
 .parcel-meta dd { color: var(--ink); min-width: 0; overflow-wrap: break-word; }
 .parcel-meta dd a { color: var(--green-deep); text-decoration: underline; text-underline-offset: 2px; }
 
-.parcel-photo-note {
-  margin: 10px 0 10px;
-  padding: 8px 10px;
+/* Характеристика и рекомендации — два блока одного вида. */
+.parcel-block {
+  margin-top: 10px;
+  padding: 9px 11px;
   border-radius: 4px;
   border: 1px dashed rgba(184, 172, 138, 0.7);
 }
-.parcel-photo-note h3 {
+.parcel-block h3 {
   font: 700 10.5px var(--sans);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 3px;
 }
-.parcel-photo-note p { font: 400 12.5px/1.4 var(--sans); color: var(--ink); }
+.parcel-block p { font: 400 12.5px/1.45 var(--sans); color: var(--ink); }
+
+/* Рекомендации — смысловой центр карточки, поэтому единственный
+ * блок с плотной рамкой и лёгкой зелёной подложкой. */
+.parcel-block-recs {
+  border-style: solid;
+  border-color: rgba(95, 115, 73, 0.35);
+  border-left: 3px solid var(--green);
+  background: rgba(95, 115, 73, 0.06);
+}
+.parcel-recs {
+  margin: 6px 0 0 18px;
+  padding: 0;
+  font: 400 12.5px/1.45 var(--sans);
+  color: var(--ink);
+}
+.parcel-recs li { margin-bottom: 5px; }
+.parcel-recs li:last-child { margin-bottom: 0; }
+.parcel-recs li::marker { color: var(--green); font-weight: 700; }
+.parcel-recs-note {
+  margin-top: 8px;
+  font: italic 11.5px/1.4 var(--serif);
+  color: var(--muted);
+}
+.parcel-recs-note[hidden] { display: none; }
 
 .parcel-links {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
+  margin-top: 10px;
 }
 .zis-link {
   font: 600 12.5px var(--sans);
@@ -282,30 +309,6 @@ body.page-map { overflow: hidden; }
 }
 .zis-link:hover { color: var(--green); }
 
-/* ---------- Блок маршрута ---------- */
-
-.route-block {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: var(--bw-thin) solid var(--frame);
-  border-radius: var(--radius-base);
-  background:
-    linear-gradient(rgba(250, 247, 238, 0.55), rgba(250, 247, 238, 0.55)),
-    repeating-linear-gradient(45deg, rgba(95, 115, 73, 0.10) 0, rgba(95, 115, 73, 0.10) 1px, transparent 1px, transparent 7px);
-  padding: 10px 12px;
-}
-.route-block-text { flex: 1; min-width: 0; }
-.route-block h2 {
-  font: 700 15px/1.15 var(--serif);
-  color: var(--green-deep);
-}
-.route-block p {
-  font: 400 11.5px/1.35 var(--sans);
-  color: var(--muted);
-  margin-top: 2px;
-}
-
 /* ---------- Кнопки (component family: одна высота, один hover) ---------- */
 
 .toolbar {
@@ -313,6 +316,13 @@ body.page-map { overflow: hidden; }
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  /* Карточка участка длинная: без липкого низа ряд действий уезжал под сгиб
+   * вместе с хвостом рекомендаций. */
+  position: sticky;
+  bottom: 0;
+  padding: 10px 0 2px;
+  background: var(--paper);
+  box-shadow: 0 -10px 12px -10px rgba(40, 36, 26, 0.22);
 }
 .toolbar-divider { display: none; }
 
@@ -380,29 +390,41 @@ body.page-map { overflow: hidden; }
 .map-host .leaflet-container { background: #e8e2cf; cursor: grab; }
 .map-host .leaflet-container:active { cursor: grabbing; }
 
-/* Светлая сепия: тайлы приглушены, тёплый вэш поверх — данные читаются */
+/* Тайлы приглушены ровно настолько, чтобы контуры оставались главными чернилами:
+ * сплошного вэша над картой больше нет — он вымывал и подложку, и данные. */
 .map-host .leaflet-tile-pane {
-  filter: saturate(0.5) brightness(1.05) contrast(0.93) sepia(0.18);
+  filter: saturate(0.72) brightness(1.02) sepia(0.1);
 }
-.map-veil {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: var(--sepia-wash);
-  transition: opacity 0.3s ease;
-}
-.map-host.sat-mode ~ .map-veil { opacity: 0; }
 
 .map-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: radial-gradient(ellipse at center,
-    transparent 58%,
-    rgba(63, 58, 47, 0.08) 84%,
-    rgba(63, 58, 47, 0.16) 100%);
+    transparent 70%,
+    rgba(63, 58, 47, 0.06) 90%,
+    rgba(63, 58, 47, 0.12) 100%);
 }
 .map-host.sat-mode ~ .map-vignette { opacity: 0; }
+
+/* Подсказка на карте: что вообще можно нажать. Убирается после первого выбора. */
+.map-hint {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: var(--z-data);
+  background: rgba(250, 247, 238, 0.94);
+  border: var(--bw-thin) solid var(--frame);
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius-base);
+  padding: 7px 11px;
+  font: 600 12px var(--sans);
+  color: var(--ink);
+  box-shadow: 0 2px 10px rgba(40, 36, 26, 0.12);
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.map-hint[hidden] { display: none; }
 
 .map-host .leaflet-control-zoom a {
   background: var(--paper-soft);
@@ -416,40 +438,30 @@ body.page-map { overflow: hidden; }
   padding: 2px 6px;
 }
 
-/* Контуры ЗИС: чернила альбома — плотная заливка, гравюрная обводка */
+/* Контуры ЗИС: цветная заливка + чернильная обводка.
+ * Базовые stroke-width/fill-opacity не задаём в CSS: их ставит Leaflet при
+ * создании слоя, а CSS их перебивал, из-за чего setStyle не был виден. */
 .zis-soil-polygon {
-  fill-opacity: 0.7;
   stroke-opacity: 1;
-  stroke-width: 2.5;
   cursor: pointer;
   transition: fill-opacity 0.15s ease, stroke-width 0.15s ease;
 }
 .zis-soil-polygon:hover {
-  fill-opacity: 0.85;
-  stroke-width: 3.5;
+  fill-opacity: 0.92;
+  stroke-width: 2.6;
 }
-.zis-soil-label {
-  background: rgba(250, 247, 238, 0.94);
-  border: var(--bw-thin) solid var(--frame);
-  border-radius: var(--radius-base);
-  padding: 2px 6px;
-  font: 600 10.5px var(--sans);
-  color: var(--ink);
-  white-space: nowrap;
-  pointer-events: none;
+.zis-soil-polygon.is-selected {
+  stroke: #26231b;
+  stroke-width: 3.4;
+  fill-opacity: 0.95;
 }
 
-/* Плавающие панели-подписи на карте (если появятся) — семья альбома */
-.zis-soil-label, .hotspot-tip {
-  background: rgba(250, 247, 238, 0.94);
-  border: var(--bw-thin) solid var(--frame);
-  border-radius: var(--radius-base);
-  font: 600 12px var(--sans);
-  color: var(--ink);
-  padding: 4px 8px;
-  box-shadow: 0 2px 8px rgba(40, 36, 26, 0.12);
+/* Пока один участок выбран, остальные уходят в фоновый слой: глаз находит
+ * ответ без перебора десятков контуров. */
+.zis-soil-polygon.is-dimmed {
+  fill-opacity: 0.3;
+  stroke-opacity: 0.35;
 }
-
 /* ============================================================
    SEARCH / SHARE / TOAST — поверх всего, по z-токенам.
    ============================================================ */
@@ -612,16 +624,6 @@ body.page-map { overflow: hidden; }
 /* Bottom-sheet handle (mobile): скрыт на десктопе */
 .sheet-handle { display: none; }
 
-.route-hint {
-  flex: none;
-  font: 700 12px var(--sans);
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  border: 1px dashed rgba(184, 172, 138, 0.8);
-  border-radius: var(--radius-full);
-  padding: 4px 10px;
-}
-
 /* ============================================================
    ВСТУПИТЕЛЬНАЯ СЦЕНА: карта проявляется, досье каскадом.
    Один раз; prefers-reduced-motion (выше) всё ускоряет до мгновения.
@@ -750,7 +752,6 @@ body.page-map { overflow: hidden; }
   /* Attribution не спорит с ручкой bottom-sheet */
   .map-host .leaflet-control-attribution { font-size: 9px; }
   .map-vignette { display: none; }
-  .route-hint { display: none; }
 
   .dossier-head { gap: 10px; }
   .dossier-head .medallion { width: 58px; height: 58px; font-size: 20px; }
